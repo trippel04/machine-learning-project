@@ -30,7 +30,16 @@ def sigmoid(z: np.ndarray) -> np.ndarray:
         `sigmoid(np.array([-1000.0, 1000.0]))` must return finite numbers,
         never `nan`.
     """
-    raise NotImplementedError
+    result = np.empty_like(z, dtype=float)
+
+    positive = z >= 0
+    negative = ~positive
+
+    result[positive] = 1 / (1 + np.exp(-z[positive]))
+    exp_z = np.exp(z[negative])
+    result[negative] = exp_z / (1 + exp_z)
+
+    return result
 # ============================ END TODO (Task 1) ==============================
 
 
@@ -51,7 +60,19 @@ def softmax_loop(z: list) -> list:
     Requirement: the result must be finite for large-magnitude inputs.
         `softmax_loop([1000.0, 1001.0])` must not raise `OverflowError`.
     """
-    raise NotImplementedError
+    max_z = max(z)
+
+    exp_values = []
+    for value in z:
+        exp_values.append(math.exp(value - max_z))
+
+    total = sum(exp_values)
+
+    result = []
+    for value in exp_values:
+        result.append(value / total)
+
+    return result
 # ============================ END TODO (Task 2) ==============================
 
 
@@ -71,7 +92,11 @@ def softmax_np(z: np.ndarray) -> np.ndarray:
     Requirement: the result must be finite for large-magnitude inputs.
         `softmax_np(np.array([1000.0, 1001.0]))` must not contain `nan`.
     """
-    raise NotImplementedError
+    max_z = np.max(z)
+    exp_values = np.exp(z - max_z)
+    total = np.sum(exp_values)
+
+    return exp_values / total
 # ============================ END TODO (Task 3) ==============================
 
 
@@ -91,7 +116,15 @@ def entropy(p: np.ndarray) -> float:
         0 * log(0) = 0, so the result stays finite (never `nan`, never `inf`).
         A one-hot `p` must give exactly 0.0.
     """
-    raise NotImplementedError
+    result = np.empty_like(p, dtype=float)
+    
+    zero = p == 0.0
+    not_zero = ~zero
+    
+    result[zero] = 0.0
+    result[not_zero] = p[not_zero] * np.log(p[not_zero])
+    
+    return -np.sum(result)
 # ============================ END TODO (Task 4) ==============================
 
 
@@ -116,7 +149,17 @@ def cross_entropy(p: np.ndarray, q: np.ndarray) -> float:
         probability you take the logarithm of; Task 6 must use the same value.
         Do not modify the inputs in place.
     """
-    raise NotImplementedError
+    result = np.empty_like(p, dtype=float)
+
+    p_zero = p == 0.0
+    q_small = q < 1e-12
+    normal_calc = ~p_zero & ~q_small
+
+    result[p_zero] = 0.0
+    result[q_small & ~p_zero] = p[q_small & ~p_zero] * np.log(1e-12)
+    result[normal_calc] = p[normal_calc] * np.log(q[normal_calc])
+
+    return -np.sum(result)
 # ============================ END TODO (Task 5) ==============================
 
 
@@ -137,7 +180,17 @@ def kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
         must satisfy the identity D_KL(p || q) = H(p, q) - H(p); a test
         checks it against your own `cross_entropy` and `entropy`.
     """
-    raise NotImplementedError
+    result = np.empty_like(p, dtype=float)
+    
+    p_zero = p == 0.0
+    q_small = q < 1e-12
+    normal_calc = ~p_zero & ~q_small
+
+    result[p_zero] = 0.0
+    result[q_small & ~p_zero] = p[q_small & ~p_zero] * np.log(p[q_small & ~p_zero] / 1e-12)
+    result[normal_calc] = p[normal_calc] * np.log(p[normal_calc] / q[normal_calc])
+
+    return np.sum(result)
 # ============================ END TODO (Task 6) ==============================
 
 
