@@ -223,7 +223,20 @@ def focal_loss(p: np.ndarray, q: np.ndarray, gamma: float = 2.0,
     Requirement: with `gamma=0` and `alpha=None` this must return exactly the
         same value as `cross_entropy(p, q)` — a test checks that.
     """
-    raise NotImplementedError
+    result = np.empty_like(p, dtype=float)
+
+    p_zero = p == 0.0
+    q_small = q < 1e-12
+    normal_calc = ~p_zero & ~q_small
+
+    result[p_zero] = 0.0
+    result[q_small & ~p_zero] = p[q_small & ~p_zero] * (1 - 1e-12) ** gamma * np.log(1e-12)
+    result[normal_calc] = p[normal_calc] * (1 - q[normal_calc]) ** gamma * np.log(q[normal_calc])
+
+    if alpha is not None:
+        result = result * alpha
+
+    return -float(np.sum(result))
 # ============================ END TODO (Task 7) ==============================
 
 
