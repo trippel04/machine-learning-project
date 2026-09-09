@@ -35,6 +35,7 @@ def sigmoid(z: np.ndarray) -> np.ndarray:
     positive = z >= 0
     negative = ~positive
 
+    # Multiply by e^z for negative values to protect against overflow
     result[positive] = 1 / (1 + np.exp(-z[positive]))
     exp_z = np.exp(z[negative])
     result[negative] = exp_z / (1 + exp_z)
@@ -62,6 +63,7 @@ def softmax_loop(z: list) -> list:
     """
     max_z = max(z)
 
+    # Removing max value from all values to protect against overflow
     exp_values = []
     for value in z:
         exp_values.append(math.exp(value - max_z))
@@ -93,6 +95,7 @@ def softmax_np(z: np.ndarray) -> np.ndarray:
         `softmax_np(np.array([1000.0, 1001.0]))` must not contain `nan`.
     """
     max_z = np.max(z)
+    # Removing max value from all values to protect against overflow
     exp_values = np.exp(z - max_z)
     total = np.sum(exp_values)
 
@@ -121,6 +124,7 @@ def entropy(p: np.ndarray) -> float:
     zero = p == 0.0
     not_zero = ~zero
     
+    # If value is zero, set result to 0 directly
     result[zero] = 0.0
     result[not_zero] = p[not_zero] * np.log(p[not_zero])
     
